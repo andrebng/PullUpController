@@ -478,7 +478,7 @@ extension UIViewController {
                                   constrainBottomToSafeAreaLayoutGuide: Bool = false,
                                   animated: Bool) {
         assert(!(self is UITableViewController), "It's not possible to attach a PullUpController to a UITableViewController. Check this issue for more information: https://github.com/MarioIannotta/PullUpController/issues/14")
-        addChild(pullUpController)
+        addChildViewController(pullUpController)
         pullUpController.setup(superview: view, initialStickyPointOffset: initialStickyPointOffset, constrainBottomToSafeAreaLayoutGuide: constrainBottomToSafeAreaLayoutGuide)
         pullUpController.pullUpControllerAnimate(
             action: .add,
@@ -503,9 +503,9 @@ extension UIViewController {
                 self?.view.layoutIfNeeded()
             },
             completion: { _ in
-                pullUpController.willMove(toParent: nil)
+                pullUpController.willMove(toParentViewController: nil)
                 pullUpController.view.removeFromSuperview()
-                pullUpController.removeFromParent()
+                pullUpController.removeFromParentViewController()
             })
     }
     
