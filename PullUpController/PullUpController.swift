@@ -230,7 +230,7 @@ open class PullUpController: UIViewController {
     
     // MARK: - Setup
     
-    fileprivate func setup(superview: UIView, initialStickyPointOffset: CGFloat) {
+    fileprivate func setup(superview: UIView, initialStickyPointOffset: CGFloat, constrainBottomToSafeAreaLayoutGuide: Bool) {
         self.initialStickyPointOffset = initialStickyPointOffset
         view.translatesAutoresizingMaskIntoConstraints = false
         superview.addSubview(view)
@@ -239,7 +239,7 @@ open class PullUpController: UIViewController {
                             size: view.frame.size)
         
         setupPanGestureRecognizer()
-        setupConstraints()
+        setupConstraints(constrainBottomToSafeAreaLayoutGuide: constrainBottomToSafeAreaLayoutGuide)
         refreshConstraints(newSize: superview.frame.size,
                            customTopOffset: superview.frame.height - initialStickyPointOffset)
     }
@@ -254,7 +254,7 @@ open class PullUpController: UIViewController {
         }
     }
     
-    private func setupConstraints() {
+    private func setupConstraints(constrainBottomToSafeAreaLayoutGuide: Bool) {
         guard
             let parentView = parent?.view
             else { return }
@@ -264,7 +264,12 @@ open class PullUpController: UIViewController {
         widthConstraint = view.widthAnchor.constraint(equalToConstant: pullUpControllerPreferredSize.width)
         heightConstraint = view.heightAnchor.constraint(equalToConstant: pullUpControllerPreferredSize.height)
         heightConstraint?.priority = .defaultLow
-        bottomConstraint = parentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        
+        var viewBottomAnchor = view.bottomAnchor
+        if #available(iOS 11.0, *), constrainBottomToSafeAreaLayoutGuide {
+            viewBottomAnchor = view.safeAreaLayoutGuide.bottomAnchor
+        }
+        bottomConstraint = parentView.bottomAnchor.constraint(equalTo: viewBottomAnchor)
         
         let constraintsToActivate = [topConstraint,
                                      leftConstraint,
@@ -470,10 +475,11 @@ extension UIViewController {
      */
     open func addPullUpController(_ pullUpController: PullUpController,
                                   initialStickyPointOffset: CGFloat,
+                                  constrainBottomToSafeAreaLayoutGuide: Bool = false,
                                   animated: Bool) {
         assert(!(self is UITableViewController), "It's not possible to attach a PullUpController to a UITableViewController. Check this issue for more information: https://github.com/MarioIannotta/PullUpController/issues/14")
         addChild(pullUpController)
-        pullUpController.setup(superview: view, initialStickyPointOffset: initialStickyPointOffset)
+        pullUpController.setup(superview: view, initialStickyPointOffset: initialStickyPointOffset, constrainBottomToSafeAreaLayoutGuide: constrainBottomToSafeAreaLayoutGuide)
         pullUpController.pullUpControllerAnimate(
             action: .add,
             withDuration: animated ? 0.3 : 0,
